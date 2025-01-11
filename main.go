@@ -4,25 +4,15 @@ import (
 	"fmt"
 	"log"
 	"plight/db"
-	"time"
 )
 
 func main() {
-    //Format to save on file
-	a := time.Now().Format(time.DateTime)
-	fmt.Println(a)
-	b := time.Now().Format(time.DateTime)
-	fmt.Println(b)
+    db := db.StartDB()
 
-    //Retrieve from file
-	fmt.Println()
-	c , _ := time.Parse(time.DateTime,a)
-    d , _ := time.Parse(time.DateTime,b)
-    e := d.Sub(c).String()
-	fmt.Println(e)
-    x, _ := time.ParseDuration(e)
-    fmt.Println(x)
-
-    log.Println(db.StartDB("bro.xd").EnsureDB())
+    db.EnsureDB()
+    
+    log.Println(db.WriteDB("gaming"))
+    
+    fmt.Println(db.ReadDB())
    
 }
