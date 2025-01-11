@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"plight/db"
 	"time"
 )
 
@@ -9,7 +11,6 @@ func main() {
     //Format to save on file
 	a := time.Now().Format(time.DateTime)
 	fmt.Println(a)
-	time.Sleep(3 * time.Second)
 	b := time.Now().Format(time.DateTime)
 	fmt.Println(b)
 
@@ -21,4 +22,7 @@ func main() {
 	fmt.Println(e)
     x, _ := time.ParseDuration(e)
     fmt.Println(x)
+
+    log.Println(db.StartDB("bro.xd").EnsureDB())
+   
 }
