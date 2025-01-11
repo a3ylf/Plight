@@ -3,13 +3,12 @@ package db
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"sync"
 	"time"
 )
 
-// TODO: TOTAL TIME WORKED 
+// TODO: TOTAL TIME WORKED
 
 type Plight struct {
 	mux      sync.RWMutex
@@ -109,7 +108,7 @@ func (p *Plight) WriteDB(to string) error {
 	if err != nil {
 		return err
 	}
-	timenow := fmt.Sprintln(time.Now().Date())
+	timenow := fmt.Sprint(time.Now().Date())
 
 	if data.Sessions == nil {
 		data.Sessions = make(map[string]Timers)
@@ -120,13 +119,15 @@ func (p *Plight) WriteDB(to string) error {
 		}
 	}
 	last := len(data.Sessions[to].Periods[timenow]) - 1
-	log.Println(last)
+
 	if last == -1 {
 
 		data.Sessions[to].Periods[timenow] = append(data.Sessions[to].Periods[timenow],
 			Period{From: time.Now().Format(time.TimeOnly)})
-        } else if data.Sessions[to].Periods[timenow][last].To == "" {
+
+	} else if data.Sessions[to].Periods[timenow][last].To == "" {
 		data.Sessions[to].Periods[timenow][last].To = time.Now().Format(time.TimeOnly)
+
 	} else {
 		data.Sessions[to].Periods[timenow] = append(data.Sessions[to].Periods[timenow],
 			Period{From: time.Now().Format(time.TimeOnly)})

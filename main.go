@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"plight/db"
 )
 
@@ -11,8 +9,7 @@ func main() {
 
     db.EnsureDB()
     
-    log.Println(db.WriteDB("gaming"))
+    db.WriteDB("gaming")
     
-    fmt.Println(db.ReadDB())
    
 }
