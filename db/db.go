@@ -4,40 +4,46 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"plight/flags"
 	"sync"
 	"time"
 )
-
-// TODO: TOTAL TIME WORKED
 
 type Plight struct {
 	mux      sync.RWMutex
 	filename string
 }
 
-func StartDB(filename ...string) *Plight {
-	base := "data.json"
+func StartDB(filename ...string) (*Plight, error) {
+	name := "data.json"
 	if len(filename) > 0 {
-		base = filename[0]
+		name = filename[0]
 	}
-	return &Plight{
+	if flags.Dev {
+		name = "debug.json"
+	}
+	db := &Plight{
 		mux:      sync.RWMutex{},
-		filename: base,
+		filename: name,
 	}
-
+	err := db.EnsureDB()
+	return db, err
 }
 
-func (p *Plight) EnsureDB() error {
-	name := "data.json"
-	if p.filename != "" {
-		name = p.filename
-
+func (p *Plight) ResetDB() error {
+	err := os.Remove(p.filename)
+	if err == nil {
+		err = p.EnsureDB()
 	}
+	return err
+}
+func (p *Plight) EnsureDB() error {
 
-	_, err := os.Open(name)
+	_, err := os.Open(p.filename)
 
 	if err != nil {
-		err = createDB(name)
+
+		err = createDB(p.filename)
 	}
 
 	return err
@@ -45,7 +51,7 @@ func (p *Plight) EnsureDB() error {
 
 func createDB(filename string) error {
 	data := &Data{
-		Sessions: make(map[string]Timers), // Garantir que o mapa 'z' esteja inicializado
+		Sessions: make(map[string]Timers),
 	}
 	b, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
@@ -54,20 +60,6 @@ func createDB(filename string) error {
 
 	err = os.WriteFile(filename, b, 0644)
 	return err
-}
-
-type Period struct {
-	From string `json:"from"`
-	To   string `json:"to"`
-}
-
-type Timers struct {
-	Total   string              `json:"total"`
-	Periods map[string][]Period `json:"periods"`
-}
-
-type Data struct {
-	Sessions map[string]Timers `json:"sessions"`
 }
 
 func (p *Plight) ReadDB() (*Data, error) {
@@ -115,40 +107,49 @@ func (p *Plight) WriteDB(session string) error {
 	}
 	if _, e := data.Sessions[session]; !e {
 		data.Sessions[session] = Timers{
-			Periods: make(map[string][]Period),
+			Days: make(map[string]Day),
 
 			// xd
-			Total: time.Now().Sub(time.Now()).String(),
 		}
 	}
-	last := len(data.Sessions[session].Periods[timenow]) - 1
+	last := len(data.Sessions[session].Days[timenow].Periods) - 1
 
 	if last == -1 {
+		a := Day{
+			Day_Total: "0s",
+			Periods: []Period{
+				Period{
+					From: time.Now().Format(time.TimeOnly)},
+			},
+		}
+		data.Sessions[session].Days[timenow] = a
 
-		data.Sessions[session].Periods[timenow] = append(data.Sessions[session].Periods[timenow],
-			Period{From: time.Now().Format(time.TimeOnly)})
-
-	} else if data.Sessions[session].Periods[timenow][last].To == "" {
+	} else if data.Sessions[session].Days[timenow].Periods[last].To == "" {
 		now := time.Now().Format(time.TimeOnly)
-		data.Sessions[session].Periods[timenow][last].To = now
-		dur, err := time.ParseDuration(data.Sessions[session].Total)
-        from, err:= time.Parse(time.TimeOnly,data.Sessions[session].Periods[timenow][last].From)
-        to, err:= time.Parse(time.TimeOnly,data.Sessions[session].Periods[timenow][last].To)
-        if err != nil {
-            return err
-        }
+		data.Sessions[session].Days[timenow].Periods[last].To = now
+		dur, err := time.ParseDuration(data.Sessions[session].Days[timenow].Day_Total)
+		from, err := time.Parse(time.TimeOnly, data.Sessions[session].Days[timenow].Periods[last].From)
+		to, err := time.Parse(time.TimeOnly, data.Sessions[session].Days[timenow].Periods[last].To)
+
+		if err != nil {
+			return err
+		}
 		newTotal := to.
 			Add(dur).
 			Sub(from).
 			String()
 
-        s := data.Sessions[session]
-        s.Total = newTotal
-		data.Sessions[session] = s
+		s := data.Sessions[session].Days[timenow]
+		s.Day_Total = newTotal
+
+		data.Sessions[session].Days[timenow] = s
 
 	} else {
-		data.Sessions[session].Periods[timenow] = append(data.Sessions[session].Periods[timenow],
-			Period{From: time.Now().Format(time.TimeOnly)})
+		a := data.Sessions[session].Days[timenow]
+		a.Periods = append(a.Periods, Period{
+			Id:   last + 1,
+			From: time.Now().Format(time.TimeOnly)})
+		data.Sessions[session].Days[timenow] = a
 	}
 	d, err := json.MarshalIndent(data, "", "   ")
 	if err != nil {
