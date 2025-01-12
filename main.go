@@ -1,15 +1,10 @@
 package main
 
 import (
-	"plight/db"
+	"plight/cfg"
 )
 
 func main() {
-    db := db.StartDB()
-
-    db.EnsureDB()
-    
-    db.WriteDB("gaming")
-    
-   
+    cfg.Start()
+	// db.WriteDB("gaming")
 }
