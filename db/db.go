@@ -101,7 +101,7 @@ func (p *Plight) ReadDB() (*Data, error) {
 //    x, _ := time.ParseDuration(e)
 //    fmt.Println(x)
 
-func (p *Plight) WriteDB(to string) error {
+func (p *Plight) WriteDB(session string) error {
 
 	data, err := p.ReadDB()
 
@@ -113,23 +113,41 @@ func (p *Plight) WriteDB(to string) error {
 	if data.Sessions == nil {
 		data.Sessions = make(map[string]Timers)
 	}
-	if _, e := data.Sessions[to]; !e {
-		data.Sessions[to] = Timers{
+	if _, e := data.Sessions[session]; !e {
+		data.Sessions[session] = Timers{
 			Periods: make(map[string][]Period),
+
+			// xd
+			Total: time.Now().Sub(time.Now()).String(),
 		}
 	}
-	last := len(data.Sessions[to].Periods[timenow]) - 1
+	last := len(data.Sessions[session].Periods[timenow]) - 1
 
 	if last == -1 {
 
-		data.Sessions[to].Periods[timenow] = append(data.Sessions[to].Periods[timenow],
+		data.Sessions[session].Periods[timenow] = append(data.Sessions[session].Periods[timenow],
 			Period{From: time.Now().Format(time.TimeOnly)})
 
-	} else if data.Sessions[to].Periods[timenow][last].To == "" {
-		data.Sessions[to].Periods[timenow][last].To = time.Now().Format(time.TimeOnly)
+	} else if data.Sessions[session].Periods[timenow][last].To == "" {
+		now := time.Now().Format(time.TimeOnly)
+		data.Sessions[session].Periods[timenow][last].To = now
+		dur, err := time.ParseDuration(data.Sessions[session].Total)
+        from, err:= time.Parse(time.TimeOnly,data.Sessions[session].Periods[timenow][last].From)
+        to, err:= time.Parse(time.TimeOnly,data.Sessions[session].Periods[timenow][last].To)
+        if err != nil {
+            return err
+        }
+		newTotal := to.
+			Add(dur).
+			Sub(from).
+			String()
+
+        s := data.Sessions[session]
+        s.Total = newTotal
+		data.Sessions[session] = s
 
 	} else {
-		data.Sessions[to].Periods[timenow] = append(data.Sessions[to].Periods[timenow],
+		data.Sessions[session].Periods[timenow] = append(data.Sessions[session].Periods[timenow],
 			Period{From: time.Now().Format(time.TimeOnly)})
 	}
 	d, err := json.MarshalIndent(data, "", "   ")
