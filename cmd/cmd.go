@@ -36,19 +36,21 @@ func Start() {
 					sess, err := db.GetSessions()
 					if err != nil {
 						log.Println(err)
+						return
 					}
 					fmt.Println(sess)
+					return
 				} else if l == 3 {
 					sess, err := db.GetSession(args[2])
 					if err != nil {
 						log.Println(err)
+						return
 					}
 					fmt.Println(sess)
 				} else {
 					fmt.Println("Too many arguments")
+					return
 				}
-				log.Println(l)
-				return
 			}
 
 			err = db.SessionAdd(args[1])

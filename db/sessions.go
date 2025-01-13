@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
@@ -12,7 +13,11 @@ func (p *Plight) GetSession(session string) (Timers, error) {
     if err != nil {
         return Timers{},err
     }
-    return data.Sessions[session], err
+    if t , e := data.Sessions[session]; e {
+        return t,nil
+
+    }
+    return Timers{}, errors.New("Unable to find this session")
 }
 
 func (p *Plight) GetSessions() (Sessions, error) {
