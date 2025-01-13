@@ -7,7 +7,7 @@ type Period struct {
 }
 type Day struct {
     Day_Total string `json:"total"`
-	Periods   []Period
+	Periods   []Period `json:"periods"`
 }
 
 type Timers struct {
@@ -16,4 +16,5 @@ type Timers struct {
 
 type Data struct {
 	Sessions map[string]Timers `json:"sessions"`
+	Hits map[string]map[string]int `json:"hits"`
 }
