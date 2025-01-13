@@ -5,6 +5,26 @@ import (
 	"time"
 )
 
+func (p *Plight) GetSession(session string) (Timers, error) {
+
+    data, err := p.ReadDB()
+    
+    if err != nil {
+        return Timers{},err
+    }
+    return data.Sessions[session], err
+}
+
+func (p *Plight) GetSessions() (Sessions, error) {
+
+    data, err := p.ReadDB()
+    
+    if err != nil {
+        return Sessions{},err
+    }
+
+    return data.Sessions, err
+}
 func (p *Plight) SessionAdd(session string) error {
 
 	data, err := p.ReadDB()
