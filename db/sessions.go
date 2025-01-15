@@ -6,18 +6,24 @@ import (
 	"time"
 )
 
-func (p *Plight) GetSession(session string) (Timers, error) {
+func (p *Plight) GetSession(session string) (Days, error) {
 
     data, err := p.ReadDB()
     
     if err != nil {
-        return Timers{},err
+        return Days{},err
     }
     if t , e := data.Sessions[session]; e {
         return t,nil
 
     }
-    return Timers{}, errors.New("Unable to find this session")
+    return Days{}, errors.New("Unable to find this session")
+}
+
+type ReadableSession struct {
+    session string
+
+     
 }
 
 func (p *Plight) GetSessions() (Sessions, error) {
@@ -27,6 +33,13 @@ func (p *Plight) GetSessions() (Sessions, error) {
     if err != nil {
         return Sessions{},err
     }
+
+    // for a, e := range data.Sessions {
+    //     fmt.Println(a,",", e )
+    //         for k, x := range e {
+    //     }
+    // }
+    //
 
     return data.Sessions, err
 }
@@ -40,16 +53,12 @@ func (p *Plight) SessionAdd(session string) error {
 	timenow := fmt.Sprint(time.Now().Date())
 
 	if data.Sessions == nil {
-		data.Sessions = make(map[string]Timers)
+		data.Sessions = make(map[string]Days)
 	}
 	if _, e := data.Sessions[session]; !e {
-		data.Sessions[session] = Timers{
-			Days: make(map[string]Day),
-
-			// xd
-		}
+            data.Sessions[session] = Days{}
 	}
-	last := len(data.Sessions[session].Days[timenow].Periods) - 1
+	last := len(data.Sessions[session][timenow].Periods) - 1
 
 	if last == -1 {
 		a := Day{
@@ -59,14 +68,14 @@ func (p *Plight) SessionAdd(session string) error {
 					From: time.Now().Format(time.TimeOnly)},
 			},
 		}
-		data.Sessions[session].Days[timenow] = a
+		data.Sessions[session][timenow] = a
 
-	} else if data.Sessions[session].Days[timenow].Periods[last].To == "" {
+	} else if data.Sessions[session][timenow].Periods[last].To == "" {
 		now := time.Now().Format(time.TimeOnly)
-		data.Sessions[session].Days[timenow].Periods[last].To = now
-		dur, err := time.ParseDuration(data.Sessions[session].Days[timenow].Day_Total)
-		from, err := time.Parse(time.TimeOnly, data.Sessions[session].Days[timenow].Periods[last].From)
-		to, err := time.Parse(time.TimeOnly, data.Sessions[session].Days[timenow].Periods[last].To)
+		data.Sessions[session][timenow].Periods[last].To = now
+		dur, err := time.ParseDuration(data.Sessions[session][timenow].Day_Total)
+		from, err := time.Parse(time.TimeOnly, data.Sessions[session][timenow].Periods[last].From)
+		to, err := time.Parse(time.TimeOnly, data.Sessions[session][timenow].Periods[last].To)
 
 		if err != nil {
 			return err
@@ -76,17 +85,17 @@ func (p *Plight) SessionAdd(session string) error {
 			Sub(from).
 			String()
 
-		s := data.Sessions[session].Days[timenow]
+		s := data.Sessions[session][timenow]
 		s.Day_Total = newTotal
 
-		data.Sessions[session].Days[timenow] = s
+		data.Sessions[session][timenow] = s
 
 	} else {
-		a := data.Sessions[session].Days[timenow]
+		a := data.Sessions[session][timenow]
 		a.Periods = append(a.Periods, Period{
 			Id:   last + 1,
 			From: time.Now().Format(time.TimeOnly)})
-		data.Sessions[session].Days[timenow] = a
+		data.Sessions[session][timenow] = a
 	}
 
 	err = p.writeDB(data)

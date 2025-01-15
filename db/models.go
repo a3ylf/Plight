@@ -10,11 +10,9 @@ type Day struct {
 	Periods   []Period `json:"periods"`
 }
 
-type Timers struct {
-	Days  map[string]Day `json:"days"`
-}
+type Days map[string]Day 
 
-type Sessions map[string]Timers 
+type Sessions map[string]Days 
 
 type Data struct {
     Sessions Sessions  `json:"sessions"`

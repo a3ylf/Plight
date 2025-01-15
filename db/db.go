@@ -49,7 +49,7 @@ func (p *Plight) EnsureDB() error {
 
 func createDB(filename string) error {
 	data := &Data{
-		Sessions: make(map[string]Timers),
+		Sessions: make(map[string]Days),
 		Hits:     make(map[string]map[string]int),
 	}
 	b, err := json.MarshalIndent(data, "", "  ")

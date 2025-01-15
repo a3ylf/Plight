@@ -27,7 +27,7 @@ func Start() {
 
 	args := flags.ParseArgs()
 	switch args[0] {
-	case "s":
+	case "s","session":
 		l := len(args)
 		if l > 1 {
 			a1 := args[1]
@@ -63,7 +63,7 @@ func Start() {
 		} else {
 			fmt.Println("Use: plight s (session name)")
 		}
-	case "h":
+	case "h","hit":
 		if len(args) == 2 {
 			err = db.HitAdd(args[1])
 			if err != nil {
