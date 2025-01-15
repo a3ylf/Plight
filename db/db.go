@@ -3,8 +3,9 @@ package db
 import (
 	"encoding/json"
 	"os"
-	"plight/flags"
 	"sync"
+
+	"github.com/a3ylf/plight/flags"
 )
 
 type Plight struct {

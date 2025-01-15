@@ -3,9 +3,10 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"plight/db"
-	"plight/flags"
 	"time"
+
+	"github.com/a3ylf/plight/db"
+	"github.com/a3ylf/plight/flags"
 )
 
 func Start() {

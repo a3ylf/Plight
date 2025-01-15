@@ -8,40 +8,26 @@ import (
 
 func (p *Plight) GetSession(session string) (Days, error) {
 
-    data, err := p.ReadDB()
-    
-    if err != nil {
-        return Days{},err
-    }
-    if t , e := data.Sessions[session]; e {
-        return t,nil
+	data, err := p.ReadDB()
 
-    }
-    return Days{}, errors.New("Unable to find this session")
-}
+	if err != nil {
+		return Days{}, err
+	}
+	if t, e := data.Sessions[session]; e {
+		return t, nil
 
-type ReadableSession struct {
-    session string
-
-     
+	}
+	return Days{}, errors.New("Unable to find this session")
 }
 
 func (p *Plight) GetSessions() (Sessions, error) {
 
-    data, err := p.ReadDB()
-    
-    if err != nil {
-        return Sessions{},err
-    }
+	data, err := p.ReadDB()
 
-    // for a, e := range data.Sessions {
-    //     fmt.Println(a,",", e )
-    //         for k, x := range e {
-    //     }
-    // }
-    //
-
-    return data.Sessions, err
+	if err != nil {
+		return Sessions{}, err
+	}
+	return data.Sessions, err
 }
 func (p *Plight) SessionAdd(session string) error {
 
@@ -56,7 +42,7 @@ func (p *Plight) SessionAdd(session string) error {
 		data.Sessions = make(map[string]Days)
 	}
 	if _, e := data.Sessions[session]; !e {
-            data.Sessions[session] = Days{}
+		data.Sessions[session] = Days{}
 	}
 	last := len(data.Sessions[session][timenow].Periods) - 1
 
