@@ -28,26 +28,31 @@ func Start() {
 
 	args := flags.ParseArgs()
 	switch args[0] {
-	case "s","session":
+	case "s", "session":
 		l := len(args)
 		if l > 1 {
 			a1 := args[1]
 			if a1 == "show" {
 				if l == 2 {
-					sess, err := db.GetSessions()
-					if err != nil {
-						log.Println(err)
+					if flags.Raw {
+						sess, err := db.GetSessions()
+						if err != nil {
+							log.Println(err)
+							return
+						}
+						fmt.Println(string(sess))
 						return
 					}
-					fmt.Println(sess)
-					return
 				} else if l == 3 {
-					sess, err := db.GetSession(args[2])
-					if err != nil {
-						log.Println(err)
+					if flags.Raw {
+						sess, err := db.GetSession(args[2])
+						if err != nil {
+							log.Println(err)
+							return
+						}
+						fmt.Println(string(sess))
 						return
 					}
-					fmt.Println(sess)
 				} else {
 					fmt.Println("Too many arguments")
 					return
@@ -64,7 +69,7 @@ func Start() {
 		} else {
 			fmt.Println("Use: plight s (session name)")
 		}
-	case "h","hit":
+	case "h", "hit":
 		if len(args) == 2 {
 			err = db.HitAdd(args[1])
 			if err != nil {
