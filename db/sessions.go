@@ -1,33 +1,37 @@
 package db
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 )
 
-func (p *Plight) GetSession(session string) (Days, error) {
+func (p *Plight) GetSession(session string) ([]byte, error) {
 
 	data, err := p.ReadDB()
 
 	if err != nil {
-		return Days{}, err
+		return []byte{}, err
 	}
-	if t, e := data.Sessions[session]; e {
-		return t, nil
+	t, e := data.Sessions[session]
 
+	if !e {
+		return []byte{}, errors.New("Unable to find this session")
 	}
-	return Days{}, errors.New("Unable to find this session")
+    send, err := json.MarshalIndent(t,"","   ")
+	return send, nil
 }
 
-func (p *Plight) GetSessions() (Sessions, error) {
+func (p *Plight) GetSessions() ([]byte, error) {
 
 	data, err := p.ReadDB()
 
 	if err != nil {
-		return Sessions{}, err
+		return []byte{}, err
 	}
-	return data.Sessions, err
+    d, err := json.MarshalIndent(data.Sessions,"", "   ")
+	return d, err
 }
 func (p *Plight) SessionAdd(session string) error {
 

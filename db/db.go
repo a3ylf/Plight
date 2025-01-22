@@ -107,5 +107,3 @@ func (p *Plight) writeDB(data *Data) error {
 	return err
 
 }
-
-
