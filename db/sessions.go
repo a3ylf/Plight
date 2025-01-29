@@ -19,7 +19,7 @@ func (p *Plight) GetSession(session string) ([]byte, error) {
 	if !e {
 		return []byte{}, errors.New("Unable to find this session")
 	}
-    send, err := json.MarshalIndent(t,"","   ")
+	send, err := json.MarshalIndent(t, "", "   ")
 	return send, nil
 }
 
@@ -30,7 +30,7 @@ func (p *Plight) GetSessions() ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
-    d, err := json.MarshalIndent(data.Sessions,"", "   ")
+	d, err := json.MarshalIndent(data.Sessions, "", "   ")
 	return d, err
 }
 func (p *Plight) SessionAdd(session string) error {
