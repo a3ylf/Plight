@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"github.com/a3ylf/plight/db"
 	"github.com/a3ylf/plight/flags"
 	"github.com/a3ylf/plight/tui"
+	"log"
 )
 
 func Start() {
@@ -25,7 +25,7 @@ func Start() {
 	}
 
 	args := flags.ParseArgs()
-    largs := len(args)
+	largs := len(args)
 	if largs == 0 {
 		fmt.Println("No command used")
 		return
@@ -54,21 +54,18 @@ func Start() {
 			err = database.SessionAdd(args[1])
 			if err != nil {
 				fmt.Println(err)
-			} 
-			return
-			
-
+			}
 		} else {
 			fmt.Println("Use: plight s (session name)")
 		}
 	case "h", "hit":
-		if len(args) == 2 {
+		if largs == 2 {
 			err = database.HitAdd(args[1])
 			if err != nil {
 				fmt.Println(err)
-			} else {
+				return
+            }
 				fmt.Printf("Hit added to %v\n", args[1])
-			}
 		} else {
 			fmt.Println("Use plight h (hit name)")
 		}

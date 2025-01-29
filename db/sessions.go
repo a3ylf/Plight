@@ -45,12 +45,12 @@ func (p *Plight) SessionAdd(session string) error {
 		data.Sessions = make(map[string]Days)
 	}
 	if _, e := data.Sessions[session]; !e {
-        fmt.Printf("You are creating a new session, rewrite it's name to confirm\n%v: ",session)
-        var check string
-        fmt.Scan(&check)
-        if check != session {
-            return (errors.New("session not created"))
-        }
+		fmt.Printf("You are creating a new session, rewrite it's name to confirm\n%v: ", session)
+		var check string
+		fmt.Scan(&check)
+		if check != session {
+			return (errors.New("session not created"))
+		}
 		data.Sessions[session] = Days{}
 	}
 	last := len(data.Sessions[session][daynow].Periods) - 1
@@ -65,7 +65,7 @@ func (p *Plight) SessionAdd(session string) error {
 			},
 		}
 		data.Sessions[session][daynow] = day
-        fmt.Printf("Session %v started\nCurrent time: %v\n", session, timenow)
+		fmt.Printf("Session %v started\nCurrent time: %v\n", session, timenow)
 		// forgive me for this
 	} else if data.Sessions[session][daynow].Periods[last].To == "" {
 		data.Sessions[session][daynow].Periods[last].To = timenow
@@ -86,15 +86,14 @@ func (p *Plight) SessionAdd(session string) error {
 		s.Day_Total = newTotal
 
 		data.Sessions[session][daynow] = s
-        fmt.Printf("Session ended\nSession duration: %v\nNew total duration: %v\n", dursess, newTotal)
+		fmt.Printf("Session ended\nSession duration: %v\nNew total duration: %v\n", dursess, newTotal)
 
 	} else {
 		a := data.Sessions[session][daynow]
 		a.Periods = append(a.Periods, Period{
-			Id:   last + 1,
-			From: timenow,})
+			From: timenow})
 		data.Sessions[session][daynow] = a
-        fmt.Printf("Session %v started\nCurrent time: %v\n", session, timenow)
+		fmt.Printf("Session %v started\nCurrent time: %v\n", session, timenow)
 	}
 
 	err = p.writeDB(data)

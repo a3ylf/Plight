@@ -1,7 +1,6 @@
 package db
 
 type Period struct {
-    Id  int `json:"id"`
 	From string `json:"from"`
 	To   string `json:"to"`
 }
