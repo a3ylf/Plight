@@ -25,12 +25,13 @@ func Start() {
 	}
 
 	args := flags.ParseArgs()
-	if len(args) == 0 {
+    largs := len(args)
+	if largs == 0 {
 		fmt.Println("No command used")
 		return
 	}
 	switch args[0] {
-	case "show", "sh":
+	case "sh", "show":
 		data, err := database.GetData()
 		if err != nil {
 			log.Println(err)

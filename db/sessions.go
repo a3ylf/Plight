@@ -1,27 +1,26 @@
 package db
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 )
 
-func (p *Plight) GetSession(session string) ([]byte, error) {
-
-	data, err := p.ReadDB()
-
-	if err != nil {
-		return []byte{}, err
-	}
-	t, e := data.Sessions[session]
-
-	if !e {
-		return []byte{}, errors.New("Unable to find this session")
-	}
-	send, err := json.MarshalIndent(t, "", "   ")
-	return send, nil
-}
+// func (p *Plight) GetSession(session string) ([]byte, error) {
+//
+// 	data, err := p.ReadDB()
+//
+// 	if err != nil {
+// 		return []byte{}, err
+// 	}
+// 	t, e := data.Sessions[session]
+//
+// 	if !e {
+// 		return []byte{}, errors.New("Unable to find this session")
+// 	}
+// 	send, err := json.MarshalIndent(t, "", "   ")
+// 	return send, nil
+// }
 
 func (p *Plight) GetData() (*Data, error) {
 
@@ -46,6 +45,12 @@ func (p *Plight) SessionAdd(session string) error {
 		data.Sessions = make(map[string]Days)
 	}
 	if _, e := data.Sessions[session]; !e {
+        fmt.Printf("You are creating a new session, rewrite it's name to confirm\n%v: ",session)
+        var check string
+        fmt.Scan(&check)
+        if check != session {
+            return (errors.New("session not created"))
+        }
 		data.Sessions[session] = Days{}
 	}
 	last := len(data.Sessions[session][daynow].Periods) - 1
@@ -60,7 +65,7 @@ func (p *Plight) SessionAdd(session string) error {
 			},
 		}
 		data.Sessions[session][daynow] = day
-		fmt.Printf("Time added to %v, %v\n", session, timenow)
+        fmt.Printf("Session %v started\nCurrent time: %v\n", session, timenow)
 		// forgive me for this
 	} else if data.Sessions[session][daynow].Periods[last].To == "" {
 		data.Sessions[session][daynow].Periods[last].To = timenow
@@ -89,7 +94,7 @@ func (p *Plight) SessionAdd(session string) error {
 			Id:   last + 1,
 			From: timenow,})
 		data.Sessions[session][daynow] = a
-		fmt.Printf("Time added to %v, %v\n", session, timenow)
+        fmt.Printf("Session %v started\nCurrent time: %v\n", session, timenow)
 	}
 
 	err = p.writeDB(data)
