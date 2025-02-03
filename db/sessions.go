@@ -53,25 +53,75 @@ func (p *Plight) SessionAdd(session string) error {
 		}
 		data.Sessions[session] = Days{}
 	}
-	last := len(data.Sessions[session][daynow].Periods) - 1
+	last := len(data.Sessions[session].Days[daynow].Periods) - 1
 
 	if last == -1 {
-		day := Day{
-			Day_Total: "0s",
-			Periods: []Period{
-				{
-					From: timenow,
-				},
-			},
+        did := true
+        var day Day
+		dlast := data.Sessions[session].Last
+		lastlast := len(data.Sessions[session].Days[dlast].Periods) - 1
+		if data.Sessions[session].Days[dlast].Periods[last].From == "" {
+			var answer string
+			fmt.Println("I think you forgor to close last time bro 😱😱, write bob to save it ")
+			fmt.Scan(&answer)
+			if answer == "bob" {
+				data.Sessions[session].Days[dlast].Periods[lastlast].From = "23:59:59"
+				dur, err := time.ParseDuration(data.Sessions[session].Days[dlast].Day_Total)
+				from, err := time.Parse(time.TimeOnly, data.Sessions[session].Days[dlast].Periods[lastlast].From)
+
+				to, err := time.Parse(time.TimeOnly, "23:59:59")
+				if err != nil {
+					return err
+				}
+				x := to.Sub(from)
+				now := time.Now()
+				y := now.Add(x).Add(dur).Sub(now)
+				s := data.Sessions[session].Days[dlast]
+				s.Day_Total = y.String()
+
+				data.Sessions[session].Days[dlast] = s
+
+				midnight, err := time.Parse(time.TimeOnly, "00:00:00")
+				nextDay := now.Sub(midnight)
+				day = Day{
+					Day_Total: nextDay.String(),
+					Periods: []Period{
+						{
+							From: "00:00:00",
+							To:   now.String(),
+						},
+					},
+				}
+				did = true
+			} else {
+				fmt.Println("Deleting what you forgor yesterday")
+				kk := data.Sessions[session].Days[dlast].Periods
+				newperiods := kk[0:lastlast]
+				s := data.Sessions[session].Days[dlast]
+				s.Periods = newperiods
+				data.Sessions[session].Days[dlast] = s
+
+			}
 		}
-		data.Sessions[session][daynow] = day
+		if !did {
+			day = Day{
+				Day_Total: "0s",
+				Periods: []Period{
+					{
+						From: timenow,
+					},
+				},
+			}
+		}
+		data.Sessions[session].Days[daynow] = day
 		fmt.Printf("Session %v started\nCurrent time: %v\n", session, timenow)
+
 		// forgive me for this
-	} else if data.Sessions[session][daynow].Periods[last].To == "" {
-		data.Sessions[session][daynow].Periods[last].To = timenow
-		dur, err := time.ParseDuration(data.Sessions[session][daynow].Day_Total)
-		from, err := time.Parse(time.TimeOnly, data.Sessions[session][daynow].Periods[last].From)
-		to, err := time.Parse(time.TimeOnly, data.Sessions[session][daynow].Periods[last].To)
+	} else if data.Sessions[session].Days[daynow].Periods[last].To == "" {
+		data.Sessions[session].Days[daynow].Periods[last].To = timenow
+		dur, err := time.ParseDuration(data.Sessions[session].Days[daynow].Day_Total)
+		from, err := time.Parse(time.TimeOnly, data.Sessions[session].Days[daynow].Periods[last].From)
+		to, err := time.Parse(time.TimeOnly, data.Sessions[session].Days[daynow].Periods[last].To)
 
 		if err != nil {
 			return err
@@ -82,17 +132,17 @@ func (p *Plight) SessionAdd(session string) error {
 			Sub(from).
 			String()
 
-		s := data.Sessions[session][daynow]
+		s := data.Sessions[session].Days[daynow]
 		s.Day_Total = newTotal
 
-		data.Sessions[session][daynow] = s
+		data.Sessions[session].Days[daynow] = s
 		fmt.Printf("Session ended\nSession duration: %v\nNew total duration: %v\n", dursess, newTotal)
 
 	} else {
-		a := data.Sessions[session][daynow]
+		a := data.Sessions[session].Days[daynow]
 		a.Periods = append(a.Periods, Period{
 			From: timenow})
-		data.Sessions[session][daynow] = a
+		data.Sessions[session].Days[daynow] = a
 		fmt.Printf("Session %v started\nCurrent time: %v\n", session, timenow)
 	}
 
