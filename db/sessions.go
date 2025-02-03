@@ -54,6 +54,7 @@ func (p *Plight) SessionAdd(session string) error {
 		data.Sessions[session] = Days{}
 	}
 	last := len(data.Sessions[session].Days[daynow].Periods) - 1
+    //TODO TESTA AI DEPOIS PAI
 
 	if last == -1 {
         did := true
