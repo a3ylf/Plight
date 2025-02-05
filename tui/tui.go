@@ -1,5 +1,6 @@
 package tui
 
+
 import (
 	"fmt"
 
@@ -84,7 +85,7 @@ func (m model) View() string {
 		s += fmt.Sprintf("%s %s:\n", cursor, choice)
 		if _, ok := m.selected[i]; ok {
 			x := m.data.Sessions[m.sessions[i]]
-			for day, d := range x {
+			for day, d := range x.Days {
 				s += fmt.Sprintf("%s:\nTotal time: %s\nPeriods:\n", day, d.Day_Total)
 				for _, period := range d.Periods {
 					s += fmt.Sprintf("%s -> %s\n", period.From, period.To)
