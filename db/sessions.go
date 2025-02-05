@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -38,7 +39,7 @@ func (p *Plight) SessionAdd(session string) error {
 	if err != nil {
 		return err
 	}
-	daynow := fmt.Sprint(time.Now().Date())
+	daynow := time.Now().Format(time.DateOnly)
 	timenow := time.Now().Format(time.TimeOnly)
 
 	if data.Sessions == nil {
@@ -52,24 +53,29 @@ func (p *Plight) SessionAdd(session string) error {
 			return (errors.New("session not created"))
 		}
 		data.Sessions[session] = Days{
-		    Days: make(map[string]Day),
+			Days: make(map[string]Day),
 		}
 	}
 	last := len(data.Sessions[session].Days[daynow].Periods) - 1
-	//TODO TESTA AI DEPOIS PAI
 
+	// Never explaining this code in my life
 	if last == -1 {
 		did := false
 		var day Day
 		dlast := data.Sessions[session].Last
+		lday, err := time.Parse(time.DateOnly, dlast)
+		daydate, err := time.Parse(time.DateOnly, daynow)
+		if err != nil {
+			log.Println(err)
+		}
 		if dlast != "" {
 			lastlast := len(data.Sessions[session].Days[dlast].Periods) - 1
-			if data.Sessions[session].Days[dlast].Periods[last].From == "" {
+			if data.Sessions[session].Days[dlast].Periods[lastlast].To == "" && daydate.YearDay()-1 == lday.YearDay() {
 				var answer string
 				fmt.Println("I think you forgor to close last time bro 😱😱, write bob to save it ")
 				fmt.Scan(&answer)
 				if answer == "bob" {
-					data.Sessions[session].Days[dlast].Periods[lastlast].From = "23:59:59"
+					data.Sessions[session].Days[dlast].Periods[lastlast].To = "23:59:59"
 					dur, err := time.ParseDuration(data.Sessions[session].Days[dlast].Day_Total)
 					from, err := time.Parse(time.TimeOnly, data.Sessions[session].Days[dlast].Periods[lastlast].From)
 
@@ -78,7 +84,11 @@ func (p *Plight) SessionAdd(session string) error {
 						return err
 					}
 					x := to.Sub(from)
-					now := time.Now()
+					now, err := time.Parse(time.TimeOnly, timenow)
+					if err != nil {
+						fmt.Println("How?")
+					}
+
 					y := now.Add(x).Add(dur).Sub(now)
 					s := data.Sessions[session].Days[dlast]
 					s.Day_Total = y.String()
@@ -92,14 +102,14 @@ func (p *Plight) SessionAdd(session string) error {
 						Periods: []Period{
 							{
 								From: "00:00:00",
-								To:   now.String(),
+								To:   now.Format(time.TimeOnly),
 							},
 						},
 					}
 				}
 				did = true
 			} else {
-				fmt.Println("Deleting what you forgor yesterday")
+				fmt.Println("Deleting what you forgot yesterday")
 				kk := data.Sessions[session].Days[dlast].Periods
 				newperiods := kk[0:lastlast]
 				s := data.Sessions[session].Days[dlast]
@@ -118,7 +128,10 @@ func (p *Plight) SessionAdd(session string) error {
 				},
 			}
 		}
-		data.Sessions[session].Days[daynow] = day
+		d := data.Sessions[session]
+		d.Days[daynow] = day
+		d.Last = daynow
+		data.Sessions[session] = d
 		fmt.Printf("Session %v started\nCurrent time: %v\n", session, timenow)
 
 		// forgive me for this
