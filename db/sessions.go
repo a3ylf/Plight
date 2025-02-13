@@ -70,53 +70,56 @@ func (p *Plight) SessionAdd(session string) error {
 		}
 		if dlast != "" {
 			lastlast := len(data.Sessions[session].Days[dlast].Periods) - 1
-			if data.Sessions[session].Days[dlast].Periods[lastlast].To == "" && daydate.YearDay()-1 == lday.YearDay() {
-				var answer string
-				fmt.Println("I think you forgor to close last time bro 😱😱, write bob to save it ")
-				fmt.Scan(&answer)
-				if answer == "bob" {
-					data.Sessions[session].Days[dlast].Periods[lastlast].To = "23:59:59"
-					dur, err := time.ParseDuration(data.Sessions[session].Days[dlast].Day_Total)
-					from, err := time.Parse(time.TimeOnly, data.Sessions[session].Days[dlast].Periods[lastlast].From)
+			if data.Sessions[session].Days[dlast].Periods[lastlast].To == "" {
+				if daydate.YearDay()-1 == lday.YearDay() {
+					var answer string
+					fmt.Println("I think you forgor to close last time bro 😱😱, write bob to save it ")
+					fmt.Scan(&answer)
+					if answer == "bob" {
+						data.Sessions[session].Days[dlast].Periods[lastlast].To = "23:59:59"
+						dur, err := time.ParseDuration(data.Sessions[session].Days[dlast].Day_Total)
+						from, err := time.Parse(time.TimeOnly, data.Sessions[session].Days[dlast].Periods[lastlast].From)
 
-					to, err := time.Parse(time.TimeOnly, "23:59:59")
-					if err != nil {
-						return err
-					}
-					x := to.Sub(from)
-					now, err := time.Parse(time.TimeOnly, timenow)
-					if err != nil {
-						fmt.Println("How?")
-					}
+						to, err := time.Parse(time.TimeOnly, "23:59:59")
+						if err != nil {
+							return err
+						}
+						x := to.Sub(from)
+						now, err := time.Parse(time.TimeOnly, timenow)
+						if err != nil {
+							fmt.Println("How?")
+						}
 
-					y := now.Add(x).Add(dur).Sub(now)
+						y := now.Add(x).Add(dur).Sub(now)
+						s := data.Sessions[session].Days[dlast]
+						s.Day_Total = y.String()
+
+						data.Sessions[session].Days[dlast] = s
+
+						midnight, err := time.Parse(time.TimeOnly, "00:00:00")
+						nextDay := now.Sub(midnight)
+						day = Day{
+							Day_Total: nextDay.String(),
+							Periods: []Period{
+								{
+									From: "00:00:00",
+									To:   now.Format(time.TimeOnly),
+								},
+							},
+						}
+					}
+					did = true
+				} else {
+					fmt.Println("Deleting what you forgot bro")
+					kk := data.Sessions[session].Days[dlast].Periods
+					newperiods := kk[0:lastlast]
 					s := data.Sessions[session].Days[dlast]
-					s.Day_Total = y.String()
-
+					s.Periods = newperiods
 					data.Sessions[session].Days[dlast] = s
 
-					midnight, err := time.Parse(time.TimeOnly, "00:00:00")
-					nextDay := now.Sub(midnight)
-					day = Day{
-						Day_Total: nextDay.String(),
-						Periods: []Period{
-							{
-								From: "00:00:00",
-								To:   now.Format(time.TimeOnly),
-							},
-						},
-					}
 				}
-				did = true
-			} else {
-				fmt.Println("Deleting what you forgot yesterday")
-				kk := data.Sessions[session].Days[dlast].Periods
-				newperiods := kk[0:lastlast]
-				s := data.Sessions[session].Days[dlast]
-				s.Periods = newperiods
-				data.Sessions[session].Days[dlast] = s
-
-			}
+			} 
+			
 		}
 		if !did {
 			day = Day{
