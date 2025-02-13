@@ -10,8 +10,8 @@ type Day struct {
 }
 
 type Days struct {
-    Last string
-    Days  map[string]Day 
+    Last string `json:"last"`
+    Days  map[string]Day `json:"days"`
 }
 type Sessions map[string]Days 
 

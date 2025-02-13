@@ -68,7 +68,6 @@ func (p *Plight) ReadDB() (*Data, error) {
 	if err != nil {
 		return &Data{}, err
 	}
-
 	data := &Data{}
 
 	err = json.Unmarshal(b, data)
